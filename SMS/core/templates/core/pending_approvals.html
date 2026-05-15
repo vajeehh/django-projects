@@ -1,0 +1,51 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="header-actions">
+    <h1>Pending Approvals</h1>
+</div>
+
+<div class="card table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Email</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td style="font-weight: 600;">{{ u.username }}</td>
+                <td>{{ u.first_name }} {{ u.last_name }}</td>
+                <td>
+                    {% if u.student %}
+                        <span style="background-color: #e0e7ff; color: #3730a3; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 500;">Student</span>
+                    {% elif u.staff %}
+                        <span style="background-color: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 500;">Staff{% if u.staff.role %} ({{ u.staff.role }}){% endif %}</span>
+                    {% else %}
+                        <span>System User</span>
+                    {% endif %}
+                </td>
+                <td>{{ u.email }}</td>
+                <td>
+                    <form method="post" action="{% url 'core:approve_user' u.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-success" style="background-color: var(--success); color: white; border: none; cursor: pointer;">Approve</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                    There are no pending user approvals right now.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

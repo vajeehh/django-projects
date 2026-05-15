@@ -1,0 +1,52 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="header-actions">
+    <h1>Staff Members</h1>
+    {% if user.is_superuser %}
+    <a href="{% url 'core:staff_create' %}" class="btn btn-primary">+ Add Staff</a>
+    {% endif %}
+</div>
+
+<div class="card table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Hire Date</th>
+                {% if user.is_superuser %}
+                <th>Actions</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for staff in staff_members %}
+            <tr>
+                <td>{{ staff.first_name }} {{ staff.last_name }}</td>
+                <td>{{ staff.email }}</td>
+                <td>
+                    <span style="background: #e0e7ff; color: #4338ca; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 500;">
+                        {{ staff.role }}
+                    </span>
+                </td>
+                <td>{{ staff.hire_date|date:"M d, Y" }}</td>
+                {% if user.is_superuser %}
+                <td>
+                    <a href="{% url 'core:staff_update' staff.pk %}" class="btn btn-sm btn-secondary">Edit</a>
+                    <a href="{% url 'core:staff_delete' staff.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+                {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                    No staff members found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

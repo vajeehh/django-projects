@@ -1,0 +1,48 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="header-actions">
+    <h1>Students</h1>
+    {% if user.is_superuser %}
+    <a href="{% url 'core:student_create' %}" class="btn btn-primary">+ Add Student</a>
+    {% endif %}
+</div>
+
+<div class="card table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Advisor</th>
+                <th>Enroll Date</th>
+                {% if user.is_superuser %}
+                <th>Actions</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>{{ student.first_name }} {{ student.last_name }}</td>
+                <td>{{ student.email }}</td>
+                <td>{{ student.advisor|default:"<span style='color: var(--text-muted); font-style: italic;'>Unassigned</span>" }}</td>
+                <td>{{ student.enroll_date|date:"M d, Y" }}</td>
+                {% if user.is_superuser %}
+                <td>
+                    <a href="{% url 'core:student_update' student.pk %}" class="btn btn-sm btn-secondary">Edit</a>
+                    <a href="{% url 'core:student_delete' student.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+                {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                    No students found. Add your first student to get started!
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

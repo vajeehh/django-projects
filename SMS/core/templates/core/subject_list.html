@@ -1,0 +1,48 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="header-actions">
+    <h1>Subjects</h1>
+    {% if user.is_superuser %}
+    <a href="{% url 'core:subject_create' %}" class="btn btn-primary">+ Add Subject</a>
+    {% endif %}
+</div>
+
+<div class="card table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Subject Code</th>
+                <th>Subject Name</th>
+                <th>Course</th>
+                <th>Teacher</th>
+                {% if user.is_superuser %}
+                <th>Actions</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for subject in subjects %}
+            <tr>
+                <td style="font-weight: 600;">{{ subject.code }}</td>
+                <td>{{ subject.name }}</td>
+                <td>{{ subject.course.name }}</td>
+                <td>{{ subject.teacher|default:"<span style='color: var(--text-muted); font-style: italic;'>Unassigned</span>" }}</td>
+                {% if user.is_superuser %}
+                <td>
+                    <a href="{% url 'core:subject_update' subject.pk %}" class="btn btn-sm btn-secondary">Edit</a>
+                    <a href="{% url 'core:subject_delete' subject.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+                {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                    No subjects found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

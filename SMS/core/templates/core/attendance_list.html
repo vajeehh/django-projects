@@ -1,0 +1,56 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>Attendance Records</h2>
+        {% if user.staff or user.is_superuser %}
+        <a href="{% url 'core:attendance_create' %}" class="btn btn-primary">➕ Record Attendance</a>
+        {% endif %}
+    </div>
+
+    {% if attendances %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Student</th>
+                <th>Subject</th>
+                <th>Date</th>
+                {% if user.staff or user.is_superuser %}
+                <th>Actions</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for attendance in attendances %}
+            <tr>
+                <td>{{ attendance.date|date:"M d, Y" }}</td>
+                <td>{{ attendance.student.first_name }} {{ attendance.student.last_name }}</td>
+                <td>{{ attendance.subject.name }} <span style="font-size:0.85em; color:var(--text-muted);">({{ attendance.subject.course.name }})</span></td>
+                <td>{{ attendance.date|date:"M d, Y" }}</td>
+                <td>
+                    <span style="padding: 4px 8px; border-radius: 4px; font-weight: 500; font-size: 0.85rem;
+                        {% if attendance.status == 'Present' %}background-color: #d1fae5; color: #065f46;
+                        {% elif attendance.status == 'Absent' %}background-color: #fee2e2; color: #991b1b;
+                        {% else %}background-color: #fef3c7; color: #92400e;{% endif %}">
+                        {{ attendance.status }}
+                    </span>
+                </td>
+                {% if user.staff or user.is_superuser %}
+                <td>
+                    <div style="display: flex; gap: 8px;">
+                        <a href="{% url 'core:attendance_update' attendance.pk %}" class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.85rem;">Edit</a>
+                        <a href="{% url 'core:attendance_delete' attendance.pk %}" class="btn btn-danger" style="padding: 4px 8px; font-size: 0.85rem;">Delete</a>
+                    </div>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: var(--text-muted); text-align: center; padding: 2rem 0;">No attendance records found. Start by recording attendance.</p>
+    {% endif %}
+</div>
+{% endblock %}

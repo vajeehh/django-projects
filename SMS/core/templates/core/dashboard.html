@@ -1,0 +1,164 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Total Students</h3>
+            <div class="number">{{ student_count }}</div>
+        </div>
+        <div class="stat-icon">🎓</div>
+    </div>
+    
+    <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+        <div class="stat-info">
+            <h3>Total Staff</h3>
+            <div class="number">{{ staff_count }}</div>
+        </div>
+        <div class="stat-icon">👥</div>
+    </div>
+    
+    <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+        <div class="stat-info">
+            <h3>Total Courses</h3>
+            <div class="number">{{ course_count }}</div>
+        </div>
+        <div class="stat-icon">📚</div>
+    </div>
+
+    <div class="stat-card" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+        <div class="stat-info">
+            <h3>Overall Attendance</h3>
+            <div class="number">{{ attendance_rate }}%</div>
+        </div>
+        <div class="stat-icon">✅</div>
+    </div>
+</div>
+
+<div class="charts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin: 30px 0;">
+    <div class="card">
+        <h3 style="margin-bottom: 20px;">7-Day Attendance Trend</h3>
+        <canvas id="trendChart"></canvas>
+    </div>
+    
+    <div class="card">
+        <h3 style="margin-bottom: 20px;">Subject Attendance Rates</h3>
+        <canvas id="subjectChart"></canvas>
+    </div>
+
+    {% if not is_student and not is_teacher %}
+    <div class="card">
+        <h3 style="margin-bottom: 20px;">Students per Course</h3>
+        <canvas id="courseChart" style="max-height: 300px; display: block; margin: 0 auto;"></canvas>
+    </div>
+    {% endif %}
+</div>
+
+{% if recent_absences %}
+<div class="card" style="margin-top: 2rem;">
+    <h3 style="margin-bottom: 1rem; color: var(--danger);">Recent Absences</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Subject</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in recent_absences %}
+            <tr>
+                <td>{{ record.student.first_name }} {{ record.student.last_name }}</td>
+                <td>{{ record.subject.name }}</td>
+                <td>{{ record.date|date:"M d, Y" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<div class="card">
+    <h2>Welcome to OfsysEdu Dashboard</h2>
+    <p style="color: var(--text-muted); line-height: 1.6;">
+        Manage your entire educational institution from one unified platform. Navigate using the sidebar to view, add, update, and manage students, staff, and courses seamlessly and securely.
+    </p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const dates = {{ seven_days_dates_json|safe }};
+        const presentTrend = {{ present_trend_json|safe }};
+        const absentTrend = {{ absent_trend_json|safe }};
+        
+        if(document.getElementById('trendChart')) {
+            new Chart(document.getElementById('trendChart'), {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [
+                        {
+                            label: 'Present',
+                            data: presentTrend,
+                            borderColor: '#10b981',
+                            backgroundColor: '#10b981',
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Absent',
+                            data: absentTrend,
+                            borderColor: '#ef4444',
+                            backgroundColor: '#ef4444',
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                }
+            });
+        }
+
+        const subjNames = {{ subject_names_json|safe }};
+        const subjRates = {{ subject_rates_json|safe }};
+        if(document.getElementById('subjectChart')) {
+            new Chart(document.getElementById('subjectChart'), {
+                type: 'bar',
+                data: {
+                    labels: subjNames,
+                    datasets: [{
+                        label: 'Attendance %',
+                        data: subjRates,
+                        backgroundColor: '#4f46e5',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true, max: 100 } }
+                }
+            });
+        }
+
+        {% if not is_student and not is_teacher %}
+        const courseNames = {{ course_names_json|safe }};
+        const courseCounts = {{ course_student_counts_json|safe }};
+        if(document.getElementById('courseChart')) {
+            new Chart(document.getElementById('courseChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: courseNames,
+                    datasets: [{
+                        data: courseCounts,
+                        backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'],
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+        {% endif %}
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="header-actions">
+    <h1>Courses</h1>
+    {% if user.is_superuser %}
+    <a href="{% url 'core:course_create' %}" class="btn btn-primary">+ Add Course</a>
+    {% endif %}
+</div>
+
+<div class="card table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Course Name</th>
+                <th>Subjects</th>
+                <th>Students Enrolled</th>
+                {% if user.is_superuser %}
+                <th>Actions</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for course in courses %}
+            <tr>
+                <td style="font-weight: 600;">{{ course.code }}</td>
+                <td>{{ course.name }}</td>
+                <td>{{ course.subjects.count }}</td>
+                <td>{{ course.students.count }}</td>
+                {% if user.is_superuser %}
+                <td>
+                    <a href="{% url 'core:course_update' course.pk %}" class="btn btn-sm btn-secondary">Edit</a>
+                    <a href="{% url 'core:course_delete' course.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+                {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                    No courses found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
